@@ -144,9 +144,6 @@ func (s *Service) Claim(ctx context.Context, req ClaimRequest) (*ClaimResult, er
 		return nil, apperr.Wrap(apperr.CodeInternal, "get pilot task failed", err)
 	}
 	if t.Status != domain.PTStatusAssigned {
-		if t.Status == domain.PTStatusClaimed || t.Status == domain.PTStatusCompleted {
-			return nil, apperr.Conflict("pilot_task", req.TaskID, t.Version)
-		}
 		return nil, apperr.InvalidTransition("pilot_task", string(t.Status), string(domain.PTStatusClaimed))
 	}
 	now := s.clock.Now()

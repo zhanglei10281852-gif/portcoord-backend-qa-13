@@ -140,9 +140,6 @@ func (w *Worker) poll(ctx context.Context) {
 // ClaimAndExecute claims a single task by ID and reports completion.
 // This is the core executor flow: claim → execute → report.
 func (w *Worker) ClaimAndExecute(ctx context.Context, taskID string) error {
-	w.statsMu.Lock()
-	w.stats.TasksClaimed++
-	w.statsMu.Unlock()
 	claim, err := w.taskService.Claim(ctx, pilottask.ClaimRequest{
 		TaskID:     taskID,
 		ExecutorID: w.id,
@@ -155,6 +152,10 @@ func (w *Worker) ClaimAndExecute(ctx context.Context, taskID string) error {
 		w.incErrors()
 		return fmt.Errorf("claim task %s: %w", taskID, err)
 	}
+
+	w.statsMu.Lock()
+	w.stats.TasksClaimed++
+	w.statsMu.Unlock()
 
 	w.logger.Info("claimed task",
 		apperr.F("task_id", taskID),
